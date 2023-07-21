@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route, useNavigate } from "react-router-dom";
+import { Routes, Route, useNavigate, Navigate } from "react-router-dom";
 import Header from './Header';
 import Main from './Main';
 import Footer from './Footer';
@@ -31,7 +31,7 @@ function App() {
   const [userEmail, setUserEmail] = React.useState('');
   const [infoTooltipOpen, setInfoTooltipOpen] = React.useState(false);
   const [infoTooltipImage, setInfoTooltipImage] = React.useState(imageSuccess);
-  const [message, setMessage] = React.useState('');
+  const [infoTooltipMessage, setinfoTooltipMessage] = React.useState('');
 
   const navigate = useNavigate();
 
@@ -58,15 +58,17 @@ function App() {
 
 
   React.useEffect(() => {
-    Promise.all([api.getUserInfo(), api.getInitialCards()])
+    if (loggedIn) {
+      Promise.all([api.getUserInfo(), api.getInitialCards()])
       .then(([userData, cardsData]) => {
         setCurrentUser(userData);
         setCards(cardsData);
       })
       .catch((err) => {
-        console.log(err);
+        console.log(`Ошибка ${err}`);
       })
-  }, [])
+    }  
+  }, [loggedIn])
 
   const handleEditAvatarClick = () => {
     setIsEditAvatarPopupOpen(true);
@@ -95,7 +97,6 @@ function App() {
   function handleCardLike(card) {
     // Проверяем, есть ли уже лайк на этой карточке
     const isLiked = card.likes.some(i => i._id === currentUser._id);
-
     // Отправляем запрос в API и получаем обновлённые данные карточки
     api.changeLikeCardStatus(card._id, !isLiked)
       .then((newCard) => {
@@ -157,14 +158,14 @@ function App() {
     auth.register(registerData)
       .then(() => {
         setInfoTooltipImage(imageSuccess);
-        setMessage('Вы успешно зарегистрировались!');
+        setinfoTooltipMessage('Вы успешно зарегистрировались!');
         setInfoTooltipOpen(true);
         navigate('/sign-in');
       })
       .catch((err) => {
         //Попап ошибки регистрации
         setInfoTooltipImage(imageFail);
-        setMessage('Что-то пошло не так! Попробуйте ещё раз.');
+        setinfoTooltipMessage('Что-то пошло не так! Попробуйте ещё раз.');
         setInfoTooltipOpen(true);
         console.log(`Ошибка ${err}`);
       });
@@ -176,14 +177,13 @@ function App() {
         if (res.token) {
           setLoggedIn(true);
           localStorage.setItem('jwt', res.token);
-          handleTokenCheck();
           navigate('/');
         }
       })
       .catch((err) => {
         //Попап ошибки входа
         setInfoTooltipImage(imageFail);
-        setMessage('Что-то пошло не так! Попробуйте ещё раз.');
+        setinfoTooltipMessage('Что-то пошло не так! Попробуйте ещё раз.');
         setInfoTooltipOpen(true);
         console.log(`Ошибка ${err}`);
       })
@@ -212,22 +212,18 @@ function App() {
               onCardClick={handleCardClick}
               onCardLike={handleCardLike}
               onCardDelete={handleCardDelete}
-              cards={cards} >
-            </ProtectedRoute>
+              cards={cards} />
           }
           />
           <Route exact path="/sign-up" element={
-            <>
-              <Register onRegister={handleRegister} />
-            </>
+            <Register onRegister={handleRegister} />
           }
           />
           <Route exact path="/sign-in" element={
-            <>
-              <Login onLogin={handleLogin} />
-            </>
+            <Login onLogin={handleLogin} />
           }
           />
+          <Route path="/*" element={<Navigate to="/" replace/>} />
         </Routes>
         <Footer />
         <AddPlacePopup isOpen={isAddPlacePopupOpen}
@@ -248,7 +244,7 @@ function App() {
         <InfoTooltip isOpen={infoTooltipOpen}
           onClose={closeAllPopups}
           image={infoTooltipImage}
-          message={message}
+          message={infoTooltipMessage}
         />
       </div>
     </CurrentUserContext.Provider>

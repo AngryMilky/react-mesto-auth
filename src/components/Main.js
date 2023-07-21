@@ -10,7 +10,7 @@ function Main(props) {
   return (
     <main>
       <section className="profile">
-        <img className="profile__avatar" alt="Аватар профиля" src={`${currentUser.avatar})`} />
+        <img className="profile__avatar" alt="Аватар профиля" src={currentUser.avatar} />
         <button type="button" className="profile__avatar-edit-button" onClick={props.onEditAvatar}></button>
         <div className="profile__info">
           <div className="profile__name-and-button">
@@ -27,9 +27,6 @@ function Main(props) {
           <Card
             key={card._id}
             card={card}
-            link={card.link}
-            name={card.name}
-            likes={card.likes.length}
             onCardClick={props.onCardClick}
             onCardLike={props.onCardLike}
             onCardDelete={props.onCardDelete}

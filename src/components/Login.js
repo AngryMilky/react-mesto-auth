@@ -17,7 +17,6 @@ function Login({ onLogin }) {
   const handleSubmit = (evt) => {
     evt.preventDefault();
     onLogin(userData);
-    setUserData({ email: '', password: '' });
   }
 
   return (
